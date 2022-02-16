@@ -6,7 +6,7 @@ from struct import pack, unpack
 from threading import Thread, Event
 
 PORT = 0x2BAD
-NB_LETTERS_WIN = 10
+NB_LETTERS_WIN = 30
 players = []
 list_of_words = []
 first_letter = ""
@@ -48,6 +48,7 @@ class Player(Thread):
                             self._sock.send(pack('!i', self._nbletters))
                             x = (end_time - starter_time)
                             self._sock.send(pack('!f',x))
+                            print(f"- Player {self._id} left")
                             return  
                         else:
                             self._sock.send(pack('!i', 0))
