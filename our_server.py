@@ -8,7 +8,6 @@ from threading import Thread, Event
 PORT = 0x2BAD
 NB_LETTERS_WIN = 10
 players = []
-ready_event = Event()
 list_of_words = []
 first_letter = ""
 
