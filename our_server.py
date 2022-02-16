@@ -1,11 +1,12 @@
 import random
+import time
 from socket import socket, AF_INET, SOCK_STREAM
 import string
 from struct import pack, unpack
 from threading import Thread, Event
 
 PORT = 0x2BAD
-NB_LETTERS_WIN = 30
+NB_LETTERS_WIN = 10
 players = []
 ready_event = Event()
 list_of_words = []
@@ -29,6 +30,7 @@ class Player(Thread):
         isReady = self._sock.recv(1)
         self._choice = unpack("?", isReady)[0]
         if all_players_ready():
+            starter_time = time.time()
             while True:
                 first_letter = random.choice(string.ascii_letters).lower()                
                 self._sock.send(first_letter.encode())
@@ -38,14 +40,19 @@ class Player(Thread):
                     if not (word[0] == first_letter):
                         #Si 1, mauvaise premiere lettre
                         self._sock.send(pack('!i', 1)) #Envoie code associé au mot
-                    if word in list_of_words:
+                    elif word in list_of_words:
                         #Si 0, mot conforme
-                        nb = 0
                         self._nbletters += len(word) 
-                        if self._nbletters > NB_LETTERS_WIN: 
-                            nb = 3
-                        self._sock.send(pack('!i', nb)) 
-                        wordIsCorrect = True
+                        if self._nbletters > NB_LETTERS_WIN:
+                            end_time = time.time() 
+                            self._sock.send(pack('!i', 3))
+                            self._sock.send(pack('!i', self._nbletters))
+                            x = (end_time - starter_time)
+                            self._sock.send(pack('!f',x))
+                            return  
+                        else:
+                            self._sock.send(pack('!i', 0))
+                            wordIsCorrect = True 
                     else:
                         #Si 2 mot qui n'existe pas
                         self._sock.send(pack('!i', 2))

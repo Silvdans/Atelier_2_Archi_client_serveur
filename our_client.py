@@ -11,13 +11,14 @@ if __name__ == '__main__':
         num = unpack('!i', sock.recv(4))[0]
         print(f"You're player {num}")
         isReady = False
+        gameEnded = False
         while (not isReady):
                 print("Veuillez appuyer sur R pour confirmer")
                 content = input().lower()
                 if(content == "r"):
                     isReady = True
                     sock.send(pack('?', isReady))
-        while True:
+        while not gameEnded:
             first_letter = sock.recv(4096).decode('utf-8')
             wordIsCorrect = False
             while (not wordIsCorrect):
@@ -34,15 +35,11 @@ if __name__ == '__main__':
                     print("Le mot n'existe pas, il ne fallait pas sécher les cours de français au collège en classe de 6ème B (la classe basket).")
                 elif(wordCode == 3):
                     print("Vous avez gagner la partie !")
-                    sock.close()
-
+                    timer = unpack('!f', sock.recv(4))[0]
+                    print(f"Vous avez mis {timer} secondes")
+                    gameEnded = True
+                    break
                 print("--------------------------")
                 print(f"Votre score est de {score}")
-            # elif content in ['h', 't']:
-            #     sock.send(pack('?', content == 'h'))
-            #     is_head = unpack('?', sock.recv(1))[0]
-            #     score_num = unpack('!i', sock.recv(4))[0]
-            #     print(f"It was {'HEAD' if is_head else 'TAIL'}, here are the scores :")
-            #     for i in range(1, score_num+1):
-            #         score = unpack('!i', sock.recv(4))[0]
-            #         print(f"- Player {i}{' (you)' if i == num else ''} : {score if score>=0 else '-'}")
+        
+        sock.close()
